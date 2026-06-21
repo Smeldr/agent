@@ -1,5 +1,17 @@
 # Changelog — forge-agent
 
+## [0.5.2] — 2026-06-21
+
+### Added
+
+- `type SweepFunc func(ctx context.Context) (flagged, skipped int, err error)` — exported function type for scheduled structural sweep runs; matches `App.SweepStructural` signature. (A166)
+- `type SweepScheduler` — coordinates cron-scheduled structural sweep runs via gocron. (A166)
+  - `NewSweepScheduler(schedule, timezone string, sweep SweepFunc) (*SweepScheduler, error)` — creates scheduler; validates timezone and cron expression; uses gocron singleton mode (LimitModeReschedule) so overlapping runs are never started; logs Info on flagged>0, Debug on clean run, Error on failure.
+  - `(*SweepScheduler).Start()` — non-blocking start.
+  - `(*SweepScheduler).Stop()` — graceful shutdown, waits for in-flight runs.
+
+---
+
 ## [0.5.1] — 2026-05-30
 
 ### Fixed
