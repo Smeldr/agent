@@ -1,5 +1,17 @@
 # Changelog — forge-agent
 
+## [0.6.0] — 2026-06-28
+
+### Changed
+
+- Relicensed from MIT to AGPL-3.0-or-later. `smeldr.dev/agent` imports
+  `smeldr.dev/core` (AGPL), making MIT inconsistent with the dependency's
+  license. AGPL is also the correct strategic choice: agent is the sweep and
+  continuous-operation layer of the platform, not a commodity client.
+  Copyright holder corrected to Peter Ravn Thers.
+
+---
+
 ## [0.5.2] — 2026-06-21
 
 ### Added
