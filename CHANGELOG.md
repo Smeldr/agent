@@ -1,5 +1,20 @@
 # Changelog — forge-agent
 
+## [0.6.1] — 2026-06-30
+
+### Changed
+- `Module.Register` now calls `app.RegisterFlow` with the AgentJob state flow before
+  registering the content type. Flow: draft → published ↔ paused → archived. The
+  `paused` state has `SuppressesSignals: true` — paused jobs do not receive After\*
+  lifecycle hooks, preserving their position without restarting them. (T23 Step 8, A181)
+
+### Internal
+- `smeldr.dev/core` dependency bumped from v1.26.0 to v1.44.3 (adds state flow
+  infrastructure: `RegisterFlow`, `StateFlow`, `State`, `Transition`). (T23 Step 8)
+- `go` directive updated 1.26.3 → 1.26.4 (required by core v1.44.3).
+
+---
+
 ## [0.6.0] — 2026-06-28
 
 ### Changed

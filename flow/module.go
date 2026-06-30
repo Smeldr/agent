@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"smeldr.dev/core"
 	"smeldr.dev/agent"
+	"smeldr.dev/core"
 )
 
 // Config holds the connection settings passed to every agent run.
@@ -80,13 +80,34 @@ func newWithRepo(repo smeldr.Repository[*AgentJob], cfg Config) *Module {
 	return m
 }
 
-// Register wires the module into app: registers the AgentJob content type
-// (HTTP routes + MCP tools), subscribes to the signal bus for signal-triggered
-// jobs, and starts the cron scheduler from currently published jobs.
+// Register wires the module into app: registers the AgentJob state flow,
+// registers the AgentJob content type (HTTP routes + MCP tools), subscribes
+// to the signal bus for signal-triggered jobs, and starts the cron scheduler
+// from currently published jobs.
 //
 // Call Register after all other content modules have been registered with app
 // so that signal subscriptions are established before app.Run().
 func (m *Module) Register(app *smeldr.App) {
+	if err := app.RegisterFlow(smeldr.StateFlow{
+		Name:     "agent-job",
+		TypeName: "AgentJob",
+		States: []smeldr.State{
+			{Name: "draft", IsInitial: true},
+			{Name: "published"},
+			{Name: "paused", SuppressesSignals: true},
+			{Name: "archived", IsTerminal: true},
+		},
+		Transitions: []smeldr.Transition{
+			{From: "draft", To: "published"},
+			{From: "published", To: "paused"},
+			{From: "paused", To: "published"},
+			{From: "published", To: "archived"},
+			{From: "paused", To: "archived"},
+		},
+	}); err != nil {
+		slog.Error("smeldr-agent: RegisterFlow failed", "error", err)
+	}
+
 	app.Content(m.mod)
 
 	for _, sig := range []smeldr.Signal{

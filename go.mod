@@ -1,12 +1,12 @@
 module smeldr.dev/agent
 
-go 1.26.3
+go 1.26.4
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.43.0
 	github.com/go-co-op/gocron/v2 v2.21.2
 	github.com/modelcontextprotocol/go-sdk v1.6.0
-	smeldr.dev/core v1.26.0
+	smeldr.dev/core v1.44.3
 )
 
 require (
