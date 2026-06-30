@@ -45,7 +45,7 @@ func TestMatchesSignal(t *testing.T) {
 		name    string
 		trigger string
 		filter  string
-		sig     smeldr.Signal
+		sig     smeldr.LifecycleEvent
 		evType  string
 		want    bool
 	}{

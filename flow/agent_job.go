@@ -29,7 +29,7 @@ import (
 // agent task. Published jobs are active; Draft and Archived jobs do not run.
 //
 // Trigger is either a 5-field cron expression (e.g. "45 13 * * *") or the
-// string value of a [smeldr.Signal] constant (e.g. "after_publish"). The
+// string value of a [smeldr.LifecycleEvent] constant (e.g. "after_publish"). The
 // distinction is by whitespace: cron expressions contain spaces; signal names
 // do not.
 //
@@ -41,7 +41,7 @@ type AgentJob struct {
 	smeldr.Node
 	// Name is the human-readable identifier for this job. Used as the slug source.
 	Name string `smeldr:"required"`
-	// Trigger is a 5-field cron expression or a smeldr.Signal string value.
+	// Trigger is a 5-field cron expression or a smeldr.LifecycleEvent string value.
 	Trigger string `smeldr:"required"`
 	// ContentTypeFilter restricts signal-triggered jobs to the named content type.
 	// Empty matches all types. Ignored for cron triggers.

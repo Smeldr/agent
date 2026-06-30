@@ -110,7 +110,7 @@ func (m *Module) Register(app *smeldr.App) {
 
 	app.Content(m.mod)
 
-	for _, sig := range []smeldr.Signal{
+	for _, sig := range []smeldr.LifecycleEvent{
 		smeldr.AfterCreate, smeldr.AfterUpdate,
 		smeldr.AfterPublish, smeldr.AfterUnpublish,
 		smeldr.AfterArchive, smeldr.AfterSchedule, smeldr.AfterDelete,
@@ -185,7 +185,7 @@ func (m *Module) rebuildScheduler(ctx context.Context) error {
 // handleSignal is called by app.OnSignal for every content lifecycle signal.
 // It fires published AgentJobs whose Trigger matches the signal and whose
 // ContentTypeFilter matches the event's content type.
-func (m *Module) handleSignal(ctx context.Context, sig smeldr.Signal, ev smeldr.SignalEvent) error {
+func (m *Module) handleSignal(ctx context.Context, sig smeldr.LifecycleEvent, ev smeldr.SignalEvent) error {
 	slog.Info("forge-agent: handleSignal called",
 		"signal", string(sig), "type", ev.Type, "slug", ev.Slug)
 
@@ -237,7 +237,7 @@ func (m *Module) handleSignal(ctx context.Context, sig smeldr.Signal, ev smeldr.
 
 // matchesSignal reports whether j should fire in response to sig/ev.
 // Pure function — used in handleSignal and directly testable.
-func matchesSignal(j *AgentJob, sig smeldr.Signal, ev smeldr.SignalEvent) bool {
+func matchesSignal(j *AgentJob, sig smeldr.LifecycleEvent, ev smeldr.SignalEvent) bool {
 	if j.isCronTrigger() {
 		return false
 	}

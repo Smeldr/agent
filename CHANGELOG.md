@@ -1,5 +1,15 @@
 # Changelog — forge-agent
 
+## [0.6.2] — 2026-06-30
+
+### Changed
+- `smeldr.Signal` renamed to `smeldr.LifecycleEvent` in flow/module.go, flow/agent_job.go,
+  and flow/agent_job_test.go to follow the core API rename. (A183)
+- `smeldr.dev/core` dependency bumped from v1.44.3 to v1.45.0 (LifecycleEvent rename +
+  orchestration types). (A183)
+
+---
+
 ## [0.6.1] — 2026-06-30
 
 ### Changed
