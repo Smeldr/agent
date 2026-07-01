@@ -58,6 +58,56 @@ func TestSweepScheduler_Runs(t *testing.T) {
 	t.Errorf("sweep was not called within 500ms (calls=%d)", calls.Load())
 }
 
+// ——— NewEvalQueueScheduler ————————————————————————————————————————————————
+
+type mockEvalQueue struct {
+	calls atomic.Int32
+}
+
+func (m *mockEvalQueue) DrainEvalQueue(_ context.Context) (int, int, error) {
+	m.calls.Add(1)
+	return 1, 0, nil
+}
+
+func TestNewEvalQueueScheduler_valid(t *testing.T) {
+	app := &mockEvalQueue{}
+	sch, err := NewEvalQueueScheduler("", "UTC", app)
+	if err != nil {
+		t.Fatalf("NewEvalQueueScheduler: %v", err)
+	}
+	sch.Start()
+	sch.Stop()
+}
+
+func TestNewEvalQueueScheduler_invalidTZ(t *testing.T) {
+	app := &mockEvalQueue{}
+	_, err := NewEvalQueueScheduler("*/5 * * * *", "Not/AZone", app)
+	if err == nil {
+		t.Fatal("expected error for invalid timezone, got nil")
+	}
+}
+
+func TestNewEvalQueueScheduler_drains(t *testing.T) {
+	app := &mockEvalQueue{}
+	sch, err := NewEvalQueueScheduler("@every 20ms", "", app)
+	if err != nil {
+		t.Fatalf("NewEvalQueueScheduler: %v", err)
+	}
+	sch.Start()
+	defer sch.Stop()
+
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if app.calls.Load() >= 1 {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if app.calls.Load() == 0 {
+		t.Errorf("DrainEvalQueue was not called within 2s")
+	}
+}
+
 func TestSweepScheduler_SingletonMode(t *testing.T) {
 	var concurrent atomic.Int32
 	var maxConcurrent atomic.Int32

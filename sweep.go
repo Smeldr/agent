@@ -76,3 +76,29 @@ func (s *SweepScheduler) Stop() {
 		slog.Error("sweep scheduler: shutdown error", "error", err)
 	}
 }
+
+// NewEvalQueueScheduler creates a [SweepScheduler] that drains
+// [smeldr.App.DrainEvalQueue] on a cron schedule.
+//
+// Default schedule is "*/5 * * * *" (every 5 minutes). Pass an empty string to
+// use the default.
+//
+// Usage:
+//
+//	sch, err := agent.NewEvalQueueScheduler("", "UTC", app)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	sch.Start()
+//	defer sch.Stop()
+func NewEvalQueueScheduler(schedule, timezone string, app interface {
+	DrainEvalQueue(ctx context.Context) (triggered, skipped int, err error)
+}) (*SweepScheduler, error) {
+	s := schedule
+	if s == "" {
+		s = "*/5 * * * *"
+	}
+	return NewSweepScheduler(s, timezone, func(ctx context.Context) (int, int, error) {
+		return app.DrainEvalQueue(ctx)
+	})
+}
