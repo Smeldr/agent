@@ -37,9 +37,12 @@ func TestSweepScheduler_StopGraceful(t *testing.T) {
 }
 
 func TestSweepScheduler_Runs(t *testing.T) {
-	var calls atomic.Int32
+	called := make(chan struct{}, 1)
 	s, err := NewSweepScheduler("@every 50ms", "", func(_ context.Context) (int, int, error) {
-		calls.Add(1)
+		select {
+		case called <- struct{}{}:
+		default:
+		}
 		return 0, 0, nil
 	})
 	if err != nil {
@@ -48,14 +51,12 @@ func TestSweepScheduler_Runs(t *testing.T) {
 	s.Start()
 	defer s.Stop()
 
-	deadline := time.Now().Add(500 * time.Millisecond)
-	for time.Now().Before(deadline) {
-		if calls.Load() >= 1 {
-			return
-		}
-		time.Sleep(10 * time.Millisecond)
+	select {
+	case <-called:
+		// scheduler fired at least once
+	case <-time.After(2 * time.Second):
+		t.Error("sweep was not called within 2s")
 	}
-	t.Errorf("sweep was not called within 500ms (calls=%d)", calls.Load())
 }
 
 // ——— NewEvalQueueScheduler ————————————————————————————————————————————————

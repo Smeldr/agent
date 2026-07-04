@@ -1,5 +1,15 @@
 # Changelog — forge-agent
 
+## [0.7.1] — 2026-07-04
+
+### Fixed
+- `TestSweepScheduler_Runs` in `sweep_test.go`: replaced wall-clock polling loop with
+  buffered-channel signal + `time.After(2 * time.Second)` select to eliminate CI flake
+  caused by gocron goroutine startup latency on loaded runners. Test-only change;
+  no production code affected.
+
+---
+
 ## [0.6.2] — 2026-06-30
 
 ### Changed
