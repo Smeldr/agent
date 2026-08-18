@@ -10,8 +10,12 @@ import (
 )
 
 // SweepFunc is the function called on each scheduled sweep run.
-// Returns (flagged, skipped int, err error) — matching [smeldr.App.SweepStructural].
-type SweepFunc func(ctx context.Context) (flagged, skipped int, err error)
+// Returns (walked, flagged, skipped int, err error) — matching
+// smeldr.App.SweepStructural / smeldr.App.DrainEvalQueue (smeldr.dev/core
+// v1.75.0+). walked is the total items examined this run — the count that
+// makes flagged/skipped meaningful: without it, a clean run (flagged=0,
+// skipped=0) can't be told apart from nothing having been checked at all.
+type SweepFunc func(ctx context.Context) (walked, flagged, skipped int, err error)
 
 // SweepScheduler runs a [SweepFunc] on a cron schedule using singleton mode
 // ([gocron.LimitModeReschedule]) so overlapping runs are never started.
@@ -48,16 +52,19 @@ func NewSweepScheduler(schedule, timezone string, sweep SweepFunc) (*SweepSchedu
 	_, err = s.NewJob(
 		gocron.CronJob(schedule, false),
 		gocron.NewTask(func(ctx context.Context) {
-			flagged, skipped, runErr := sweep(ctx)
+			walked, flagged, skipped, runErr := sweep(ctx)
 			if runErr != nil {
 				slog.Error("sweep: structural sweep failed", "error", runErr)
 				return
 			}
-			if flagged == 0 && skipped == 0 {
-				slog.Debug("sweep: structural sweep done", "flagged", 0, "skipped", 0)
+			if walked == 0 && flagged == 0 && skipped == 0 {
+				slog.Debug("sweep: structural sweep done", "walked", 0, "flagged", 0, "skipped", 0)
 				return
 			}
-			slog.Info("sweep: structural sweep done", "flagged", flagged, "skipped", skipped)
+			// walked > 0 alone is informative even when flagged == 0 && skipped
+			// == 0 — it's the difference between "checked everything, found
+			// nothing" and "nothing to check" (T223).
+			slog.Info("sweep: structural sweep done", "walked", walked, "flagged", flagged, "skipped", skipped)
 		}),
 		gocron.WithSingletonMode(gocron.LimitModeReschedule),
 	)
@@ -92,13 +99,13 @@ func (s *SweepScheduler) Stop() {
 //	sch.Start()
 //	defer sch.Stop()
 func NewEvalQueueScheduler(schedule, timezone string, app interface {
-	DrainEvalQueue(ctx context.Context) (triggered, skipped int, err error)
+	DrainEvalQueue(ctx context.Context) (walked, triggered, skipped int, err error)
 }) (*SweepScheduler, error) {
 	s := schedule
 	if s == "" {
 		s = "*/5 * * * *"
 	}
-	return NewSweepScheduler(s, timezone, func(ctx context.Context) (int, int, error) {
+	return NewSweepScheduler(s, timezone, func(ctx context.Context) (int, int, int, error) {
 		return app.DrainEvalQueue(ctx)
 	})
 }

@@ -1,5 +1,15 @@
 # Changelog — forge-agent
 
+## [0.8.0] — 2026-08-18
+
+### Changed
+- `SweepFunc` type signature changed from `func(ctx context.Context) (flagged, skipped int, err error)` to `func(ctx context.Context) (walked, flagged, skipped int, err error)`. New leading `walked` return value reports the total number of items examined during each run, allowing callers to distinguish "nothing needed checking" from "everything was checked and found clean." (A280)
+- `NewEvalQueueScheduler`'s anonymous `DrainEvalQueue` interface parameter signature updated to match: now returns `(walked, triggered, skipped int, err error)`. (A280)
+- `NewSweepScheduler` now logs at `Info` level whenever `walked > 0`, even if `flagged == 0 && skipped == 0`. This ensures sweep runs that actually examined items are always logged, closing ambiguity about whether the scheduler ran at all. (A280)
+- Breaking change: any existing caller supplying a `SweepFunc` to `NewSweepScheduler` must update to return 4 values instead of 3. Companion to `smeldr.dev/core` v1.75.0 (A279). No known external importers of this pre-1.0 module outside this project's own repos.
+
+---
+
 ## [0.7.1] — 2026-07-04
 
 ### Fixed
