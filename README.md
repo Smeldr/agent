@@ -4,7 +4,7 @@ A minimal Go agent runtime: Anthropic API + tool use loop + MCP client + built-i
 
 smeldr-agent connects Claude to any MCP server via SSE or Streamable HTTP, dispatches tool calls, and drives the conversation to completion. It ships as a library (`smeldr.dev/agent`) and runnable binaries.
 
-**Latest: v0.6.2** — [smeldr.dev/agent/flow](https://pkg.go.dev/smeldr.dev/agent/flow) (AGPL) · [smeldr.dev/agent](https://pkg.go.dev/smeldr.dev/agent) (AGPL-3.0)
+**Latest: v0.9.0** — [smeldr.dev/agent/flow](https://pkg.go.dev/smeldr.dev/agent/flow) (AGPL) · [smeldr.dev/agent](https://pkg.go.dev/smeldr.dev/agent) (AGPL-3.0)
 
 ---
 
