@@ -4,7 +4,7 @@
 //
 //	ANTHROPIC_API_KEY  Anthropic API key
 //	GITHUB_TOKEN       GitHub personal access token (repo scope)
-//	GITHUB_REPO        Repository in owner/repo format (e.g. forge-cms/forge)
+//	GITHUB_REPO        Repository in owner/repo format (e.g. smeldr/core)
 //
 // Optional environment variables:
 //
@@ -29,7 +29,7 @@ func main() {
 
 	repo := os.Getenv("GITHUB_REPO")
 	if repo == "" {
-		fmt.Fprintln(os.Stderr, "error: GITHUB_REPO is required (e.g. forge-cms/forge)")
+		fmt.Fprintln(os.Stderr, "error: GITHUB_REPO is required (e.g. smeldr/core)")
 		os.Exit(1)
 	}
 

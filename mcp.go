@@ -37,7 +37,7 @@ func (t *bearerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 // connectMCP connects to an MCP server and snapshots its tool list.
 // Set streamable=true for Streamable HTTP transport (GitHub MCP, 2025-03-26+ spec).
-// Set streamable=false for SSE transport (forge-mcp, 2024-11-05 spec).
+// Set streamable=false for SSE transport (smeldr-mcp, 2024-11-05 spec).
 func connectMCP(ctx context.Context, serverURL, token string, streamable bool) (*mcpClient, error) {
 	// Detach from any parent cancellation so the SSE stream outlives the
 	// triggering HTTP request, signal bus deadline, or other short-lived context.
@@ -62,7 +62,7 @@ func connectMCP(ctx context.Context, serverURL, token string, streamable bool) (
 	}
 
 	client := mcpsdk.NewClient(&mcpsdk.Implementation{
-		Name:    "forge-agent",
+		Name:    "smeldr-agent",
 		Version: "v0.1.0",
 	}, nil)
 

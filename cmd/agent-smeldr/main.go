@@ -1,10 +1,10 @@
-// agent-forge connects to a forge-mcp server and summarises published posts.
+// agent-smeldr connects to a smeldr-mcp server and summarises published posts.
 //
 // Required environment variables:
 //
 //	ANTHROPIC_API_KEY  Anthropic API key
-//	FORGE_MCP_URL      forge-mcp SSE endpoint (e.g. https://example.com/mcp)
-//	FORGE_TOKEN        forge-mcp Bearer token
+//	SMELDR_MCP_URL     smeldr-mcp SSE endpoint (e.g. https://example.com/mcp)
+//	SMELDR_TOKEN       smeldr-mcp Bearer token
 package main
 
 import (
@@ -17,9 +17,9 @@ import (
 
 func main() {
 	cfg := agent.Config{
-		MCPURL:   os.Getenv("FORGE_MCP_URL"),
-		MCPToken: os.Getenv("FORGE_TOKEN"),
-		SystemPrompt: "You are a helpful assistant with access to a Forge CMS server. " +
+		MCPURL:   os.Getenv("SMELDR_MCP_URL"),
+		MCPToken: os.Getenv("SMELDR_TOKEN"),
+		SystemPrompt: "You are a helpful assistant with access to a Smeldr server. " +
 			"Use the available MCP tools to answer questions about the site.",
 	}
 

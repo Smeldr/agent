@@ -1,6 +1,6 @@
 Set-Location (Join-Path $PSScriptRoot "..\..")
 $SERVER = "root@<your-server>"
-$BINARY = "forge-agent-scheduler"
+$BINARY = "smeldr-agent-scheduler"
 $REMOTE_BIN = "/usr/local/bin/$BINARY"
 
 Write-Host "Building linux/amd64..."

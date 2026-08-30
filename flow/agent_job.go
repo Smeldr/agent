@@ -1,19 +1,19 @@
 // AGPL-3.0-or-later
 
-// Package forgeagent wires forge-agent into a Forge application.
-// It exposes [AgentJob] as a Forge content type, which gives it full
+// Package forgeagent wires smeldr-agent into a Smeldr application.
+// It exposes [AgentJob] as a Smeldr content type, which gives it full
 // lifecycle management (Draft → Published → Archived) and auto-generated
 // MCP tools (create_agent_job, get_agent_job, list_agent_jobs,
 // update_agent_job, publish_agent_job, archive_agent_job, delete_agent_job).
 //
 // Usage:
 //
-//	db := smeldr.OpenDB("forge.db")
+//	db := smeldr.OpenDB("smeldr.db")
 //	forgeagent.CreateTable(db)
 //
 //	agentMod := forgeagent.New(db, forgeagent.Config{
 //	    MCPURL:   "http://localhost:8080/mcp",
-//	    MCPToken: os.Getenv("FORGE_TOKEN"),
+//	    MCPToken: os.Getenv("SMELDR_TOKEN"),
 //	})
 //	agentMod.Register(app)
 //	defer agentMod.Stop()
@@ -25,7 +25,7 @@ import (
 	"smeldr.dev/core"
 )
 
-// AgentJob is a Forge Node module representing a scheduled or signal-triggered
+// AgentJob is a Smeldr Node module representing a scheduled or signal-triggered
 // agent task. Published jobs are active; Draft and Archived jobs do not run.
 //
 // Trigger is either a 5-field cron expression (e.g. "45 13 * * *") or the

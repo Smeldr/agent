@@ -1,4 +1,22 @@
-# Changelog — forge-agent
+# Changelog — smeldr-agent
+
+## [0.9.0] — 2026-08-30
+
+### Changed
+- Forge→Smeldr branding rename throughout, breaking for anyone with an existing deployment:
+  - Env vars: `FORGE_MCP_URL` → `SMELDR_MCP_URL`, `FORGE_TOKEN` → `SMELDR_TOKEN`.
+  - Binary/directory: `cmd/agent-forge` → `cmd/agent-smeldr`.
+  - `example/electricity-advisor`'s scheduler binary: `forge-agent-scheduler` → `smeldr-agent-scheduler`.
+  - Systemd unit: `example/electricity-advisor/deploy/forge-agent-scheduler.service` → `smeldr-agent-scheduler.service` (unit `Description`, `EnvironmentFile`, `ExecStart` all updated to match).
+  - Config path: `/etc/forge-agent/` → `/etc/smeldr-agent/`.
+  - MCP client identity: the `mcpsdk.Implementation.Name` sent during the MCP `initialize` handshake changed from `"forge-agent"` to `"smeldr-agent"`.
+  - `flow` package's own log message prefixes: `"forge-agent: ..."` → `"smeldr-agent: ..."`.
+  - README, doc comments, and this file's own title updated to match.
+  - **Migration**: rename `FORGE_MCP_URL`/`FORGE_TOKEN` to `SMELDR_MCP_URL`/`SMELDR_TOKEN` in any existing deployment's environment; move `/etc/forge-agent/scheduler.env` to `/etc/smeldr-agent/scheduler.env`; re-copy the renamed systemd unit and binary, then `systemctl daemon-reload`.
+  - `flow/LICENSE`'s copyright holder corrected: `forge-cms` → `Peter Ravn Thers` (Peter's own explicit decision, matching this project's established commercial-identity model — rights held individually, no company).
+  - **Not changed** (flagged, needs its own separate decision): the `flow` subpackage's own Go package identifier remains `package forgeagent` — renaming it is a materially larger breaking change (breaks any unaliased `import "smeldr.dev/agent/flow"`) than this rename's own scope. (A294)
+
+---
 
 ## [0.8.0] — 2026-08-18
 

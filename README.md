@@ -1,8 +1,8 @@
-# forge-agent
+# smeldr-agent
 
 A minimal Go agent runtime: Anthropic API + tool use loop + MCP client + built-in HTTP tools. Ships with a cron scheduler for running agent jobs 24/7 in the cloud.
 
-forge-agent connects Claude to any MCP server via SSE or Streamable HTTP, dispatches tool calls, and drives the conversation to completion. It ships as a library (`smeldr.dev/agent`) and runnable binaries.
+smeldr-agent connects Claude to any MCP server via SSE or Streamable HTTP, dispatches tool calls, and drives the conversation to completion. It ships as a library (`smeldr.dev/agent`) and runnable binaries.
 
 **Latest: v0.6.2** — [smeldr.dev/agent/flow](https://pkg.go.dev/smeldr.dev/agent/flow) (AGPL) · [smeldr.dev/agent](https://pkg.go.dev/smeldr.dev/agent) (AGPL-3.0)
 
@@ -16,7 +16,7 @@ forge-agent connects Claude to any MCP server via SSE or Streamable HTTP, dispat
 | `github.com/modelcontextprotocol/go-sdk` | Official MCP Go SDK (Apache 2.0) |
 | `github.com/go-co-op/gocron/v2` | Cron scheduler (Apache 2.0) |
 
-The MCP SDK is maintained by the MCP organization. Spec changes are tracked automatically — forge-agent does not maintain its own MCP transport layer.
+The MCP SDK is maintained by the MCP organization. Spec changes are tracked automatically — smeldr-agent does not maintain its own MCP transport layer.
 
 gocron is used instead of stdlib `time` + goroutines because timezone handling on Alpine/Linux servers is a known failure mode with plain goroutine-based schedulers (forge-social hit this in v0.4.0), and missed job recovery on restart requires non-trivial handling that gocron provides out of the box.
 
@@ -26,10 +26,10 @@ gocron is used instead of stdlib `time` + goroutines because timezone handling o
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-export FORGE_MCP_URL=https://your-site.example.com/mcp
-export FORGE_TOKEN=your-forge-token
+export SMELDR_MCP_URL=https://your-site.example.com/mcp
+export SMELDR_TOKEN=your-smeldr-token
 
-go run ./cmd/agent-forge
+go run ./cmd/agent-smeldr
 ```
 
 For GitHub:
@@ -37,7 +37,7 @@ For GitHub:
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 export GITHUB_TOKEN=ghp_...
-export GITHUB_REPO=forge-cms/forge
+export GITHUB_REPO=smeldr/core
 
 go run ./cmd/agent-github
 ```
@@ -66,7 +66,7 @@ type Config struct {
 ```
 
 Set `StreamableHTTP: true` when connecting to the GitHub MCP server or any server
-implementing the 2025-03-26+ spec. Leave it `false` (the default) for forge-mcp,
+implementing the 2025-03-26+ spec. Leave it `false` (the default) for smeldr-mcp,
 which uses the SSE transport from the 2024-11-05 spec.
 
 ---
@@ -108,7 +108,7 @@ Returns `"HTTP <status>: <response body prefix>"`.
 
 ## Scheduler
 
-forge-agent ships a cron scheduler for running agent jobs continuously in the cloud.
+smeldr-agent ships a cron scheduler for running agent jobs continuously in the cloud.
 
 ### Job and Scheduler
 
@@ -161,35 +161,35 @@ The scheduler fires at 06:00 Europe/Copenhagen each day, fetches 48 hours of DK2
 
 ```powershell
 $env:GOOS = "linux"; $env:GOARCH = "amd64"
-go build -o forge-agent-scheduler ./example/electricity-advisor
+go build -o smeldr-agent-scheduler ./example/electricity-advisor
 $env:GOOS = ""; $env:GOARCH = ""
 ```
 
 **2. Copy to server**
 
 ```bash
-scp forge-agent-scheduler root@your-server:/usr/local/bin/
-scp example/electricity-advisor/deploy/forge-agent-scheduler.service root@your-server:/etc/systemd/system/
+scp smeldr-agent-scheduler root@your-server:/usr/local/bin/
+scp example/electricity-advisor/deploy/smeldr-agent-scheduler.service root@your-server:/etc/systemd/system/
 ```
 
 **3. Create the env file on the server**
 
 ```bash
-mkdir -p /etc/forge-agent
-cat > /etc/forge-agent/scheduler.env <<EOF
+mkdir -p /etc/smeldr-agent
+cat > /etc/smeldr-agent/scheduler.env <<EOF
 ANTHROPIC_API_KEY=sk-ant-...
 NTFY_TOPIC=my-ntfy-topic
 EOF
-chmod 600 /etc/forge-agent/scheduler.env
+chmod 600 /etc/smeldr-agent/scheduler.env
 ```
 
 **4. Install and start the service**
 
 ```bash
 systemctl daemon-reload
-systemctl enable forge-agent-scheduler
-systemctl start forge-agent-scheduler
-systemctl status forge-agent-scheduler
+systemctl enable smeldr-agent-scheduler
+systemctl start smeldr-agent-scheduler
+systemctl status smeldr-agent-scheduler
 ```
 
 ### Triggering a manual run
@@ -197,30 +197,30 @@ systemctl status forge-agent-scheduler
 Send SIGUSR1 to trigger an immediate agent run without restarting the service:
 
 ```bash
-systemctl kill -s SIGUSR1 forge-agent-scheduler
+systemctl kill -s SIGUSR1 smeldr-agent-scheduler
 ```
 
 The service continues running normally after the triggered run completes.
 
 ---
 
-## Forge integration — `smeldr.dev/agent/flow`
+## Smeldr integration — `smeldr.dev/agent/flow`
 
 `smeldr.dev/agent/flow` is an AGPL-3.0-or-later sub-package that wires
-agent execution into a Forge application. It exposes `AgentJob` as a Forge content
+agent execution into a Smeldr application. It exposes `AgentJob` as a Smeldr content
 type with full lifecycle management and auto-generated MCP tools.
 
 ### Quick start
 
 ```go
-import forgeagent "smeldr.dev/agent/flow"
+import agentflow "smeldr.dev/agent/flow"
 
 // At startup — create table before connecting the module.
-forgeagent.CreateTable(db)
+agentflow.CreateTable(db)
 
-agentMod := forgeagent.New(db, forgeagent.Config{
+agentMod := agentflow.New(db, agentflow.Config{
     MCPURL:   "http://localhost:8080/mcp",
-    MCPToken: os.Getenv("FORGE_TOKEN"),
+    MCPToken: os.Getenv("SMELDR_TOKEN"),
 })
 agentMod.Register(app) // wires MCP tools + signal bus
 defer agentMod.Stop()
@@ -231,7 +231,7 @@ defer agentMod.Stop()
 | Field | Type | Description |
 |-------|------|-------------|
 | `Name` | string | Human-readable identifier. Used as slug source. Required. |
-| `Trigger` | string | 5-field cron expression (`"45 13 * * *"`) or forge signal name (`"after_publish"`). Required. |
+| `Trigger` | string | 5-field cron expression (`"45 13 * * *"`) or smeldr signal name (`"after_publish"`). Required. |
 | `ContentTypeFilter` | string | Restrict signal triggers to a content type (e.g. `"Post"`). Empty = all types. Ignored for cron triggers. |
 | `SystemPrompt` | string | System instruction prepended to every run. Required. |
 | `Model` | string | Anthropic model ID. Defaults to `"claude-sonnet-4-6"`. |
@@ -279,10 +279,10 @@ module guards against self-activation automatically.
 
 ## Architecture note
 
-The MCP client in forge-agent is generic. It speaks to any SSE or Streamable HTTP
-MCP server — not just forge-mcp. The `cmd/agent-github` binary demonstrates this:
-it connects to the GitHub MCP server using Streamable HTTP while `cmd/agent-forge`
-connects to forge-mcp using SSE. Same agent loop, different transport, different
+The MCP client in smeldr-agent is generic. It speaks to any SSE or Streamable HTTP
+MCP server — not just smeldr-mcp. The `cmd/agent-github` binary demonstrates this:
+it connects to the GitHub MCP server using Streamable HTTP while `cmd/agent-smeldr`
+connects to smeldr-mcp using SSE. Same agent loop, different transport, different
 tool catalog.
 
 ---

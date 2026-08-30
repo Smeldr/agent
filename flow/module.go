@@ -15,16 +15,16 @@ import (
 
 // Config holds the connection settings passed to every agent run.
 type Config struct {
-	// MCPURL is the forge-mcp endpoint (e.g. "http://localhost:8080/mcp").
+	// MCPURL is the smeldr-mcp endpoint (e.g. "http://localhost:8080/mcp").
 	MCPURL string
-	// MCPToken is a forge token with Author-or-higher role for agent MCP calls.
+	// MCPToken is a smeldr token with Author-or-higher role for agent MCP calls.
 	MCPToken string
 	// StreamableHTTP switches the MCP client from SSE to Streamable HTTP transport.
-	// Use true when connecting to forge-mcp; false for SSE-only servers.
+	// Use true when connecting to smeldr-mcp; false for SSE-only servers.
 	StreamableHTTP bool
 }
 
-// Module integrates forge-agent with a Forge application.
+// Module integrates smeldr-agent with a Smeldr application.
 // It registers [AgentJob] as a content type, subscribes to the signal bus,
 // and manages a gocron scheduler for cron-triggered jobs.
 //
@@ -122,7 +122,7 @@ func (m *Module) Register(app *smeldr.App) {
 	}
 
 	if err := m.rebuildScheduler(context.Background()); err != nil {
-		slog.Error("forge-agent: scheduler init failed", "error", err)
+		slog.Error("smeldr-agent: scheduler init failed", "error", err)
 	}
 }
 
@@ -151,7 +151,7 @@ func (m *Module) rebuildScheduler(ctx context.Context) error {
 		Status: []smeldr.Status{smeldr.Published},
 	})
 	if err != nil {
-		return fmt.Errorf("forge-agent: load jobs: %w", err)
+		return fmt.Errorf("smeldr-agent: load jobs: %w", err)
 	}
 
 	var agentJobs []agent.Job
@@ -168,7 +168,7 @@ func (m *Module) rebuildScheduler(ctx context.Context) error {
 
 	sched, err := agent.NewScheduler(agentJobs)
 	if err != nil {
-		return fmt.Errorf("forge-agent: build scheduler: %w", err)
+		return fmt.Errorf("smeldr-agent: build scheduler: %w", err)
 	}
 
 	m.mu.Lock()
@@ -186,7 +186,7 @@ func (m *Module) rebuildScheduler(ctx context.Context) error {
 // It fires published AgentJobs whose Trigger matches the signal and whose
 // ContentTypeFilter matches the event's content type.
 func (m *Module) handleSignal(ctx context.Context, sig smeldr.LifecycleEvent, ev smeldr.SignalEvent) error {
-	slog.Info("forge-agent: handleSignal called",
+	slog.Info("smeldr-agent: handleSignal called",
 		"signal", string(sig), "type", ev.Type, "slug", ev.Slug)
 
 	// Guard: never trigger jobs in response to AgentJob lifecycle events.
@@ -200,27 +200,27 @@ func (m *Module) handleSignal(ctx context.Context, sig smeldr.LifecycleEvent, ev
 		Status: []smeldr.Status{smeldr.Published},
 	})
 	if err != nil {
-		return fmt.Errorf("forge-agent: load jobs for signal %s: %w", sig, err)
+		return fmt.Errorf("smeldr-agent: load jobs for signal %s: %w", sig, err)
 	}
-	slog.Info("forge-agent: signal jobs loaded", "count", len(jobs))
+	slog.Info("smeldr-agent: signal jobs loaded", "count", len(jobs))
 
 	// Detach from the request context so the agent run is not cancelled when
 	// the triggering HTTP request finishes.
 	runCtx := context.WithoutCancel(ctx)
 	for _, j := range jobs {
 		matched := matchesSignal(j, sig, ev)
-		slog.Info("forge-agent: signal job evaluated", "job", j.Name, "matched", matched)
+		slog.Info("smeldr-agent: signal job evaluated", "job", j.Name, "matched", matched)
 		if !matched {
 			continue
 		}
 		job := j
 		task := buildSignalTask(job, ev)
-		slog.Info("forge-agent: starting agent run",
+		slog.Info("smeldr-agent: starting agent run",
 			"job", job.Name, "signal", string(sig), "type", ev.Type, "slug", ev.Slug)
 		go func() {
 			_, runErr := agent.New(m.agentConfig(job)).Run(runCtx, task)
 			if runErr != nil {
-				slog.Error("forge-agent: signal job failed",
+				slog.Error("smeldr-agent: signal job failed",
 					"job", job.Name,
 					"signal", sig,
 					"content_type", ev.Type,
@@ -228,7 +228,7 @@ func (m *Module) handleSignal(ctx context.Context, sig smeldr.LifecycleEvent, ev
 					"error", runErr,
 				)
 			} else {
-				slog.Info("forge-agent: agent run complete", "job", job.Name)
+				slog.Info("smeldr-agent: agent run complete", "job", job.Name)
 			}
 		}()
 	}

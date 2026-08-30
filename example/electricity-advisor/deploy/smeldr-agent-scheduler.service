@@ -1,0 +1,11 @@
+[Unit]
+Description=smeldr-agent scheduler
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/smeldr-agent/scheduler.env
+ExecStart=/usr/local/bin/smeldr-agent-scheduler
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
