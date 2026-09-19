@@ -1,5 +1,12 @@
 # Changelog — smeldr-agent
 
+## [0.9.1] — 2026-09-19
+
+### Changed
+- Added `doc.go` for the root `agent` package (had no package doc comment anywhere — a second, competing comment found on `mcp.go` during implementation was removed) and for `agent/flow` (moved the existing, already-accurate comment out of `agent_job.go`). Docs-only, no behaviour change.
+
+---
+
 ## [0.9.0] — 2026-08-30
 
 ### Changed
