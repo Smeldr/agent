@@ -1,5 +1,12 @@
 # Changelog — smeldr-agent
 
+## [0.9.2] — 2026-09-19
+
+### Added
+- `codecov.yml` (target 37%, ~2 points below today's real blended 38.6% coverage across `agent`/`agent/flow`/the two `cmd/` binaries) and a coverage-upload step in `ci.yml` (`go test -coverprofile=coverage.out ./...` + `codecov/codecov-action@v5`). Neither existed before. Raising coverage toward core's own 96% gate is real, separate, follow-up work — this release only adds the regression gate at today's real baseline.
+
+---
+
 ## [0.9.1] — 2026-09-19
 
 ### Changed
