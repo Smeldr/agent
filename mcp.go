@@ -1,5 +1,3 @@
-// Package agent provides a minimal agent execution runtime: Anthropic API +
-// tool use loop + MCP client + built-in HTTP tools.
 package agent
 
 import (
