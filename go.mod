@@ -2,7 +2,7 @@ module smeldr.dev/agent
 
 go 1.26.5
 
-toolchain go1.26.10
+toolchain go1.26.11
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.43.0
